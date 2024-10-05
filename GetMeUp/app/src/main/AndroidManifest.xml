@@ -33,6 +33,8 @@
 
         <activity android:name=".ActivityGenerateCode" />
 
+        <activity android:name=".ActivityDeactivateAlarm" />
+
         <service
             android:name=".AlarmService"
             android:foregroundServiceType="mediaPlayback"/>

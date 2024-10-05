@@ -25,7 +25,7 @@ class ActivityGenerateCode : AppCompatActivity() {
         tvCodeValue.text = savedCode ?: "No code generated"
 
         btnGenerateCode.setOnClickListener {
-            val generatedCode = generateRandomCode(12)
+            val generatedCode = generateRandomCode(4)
             tvCodeValue.text = generatedCode
 
             // Store the generated code in SharedPreferences
@@ -36,9 +36,9 @@ class ActivityGenerateCode : AppCompatActivity() {
         }
     }
 
-    // Function to generate a random 12-character string with numbers, lowercase, and uppercase letters
+    // Function to generate a random 12-character string with numbers and uppercase letters
     private fun generateRandomCode(length: Int): String {
-        val charPool = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        val charPool = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         val random = Random()
         val code = StringBuilder()
 

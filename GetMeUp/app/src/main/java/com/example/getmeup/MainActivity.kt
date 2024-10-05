@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
@@ -21,13 +22,22 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnGenerateCode: Button
     private lateinit var tvAlarmTime: TextView
     private lateinit var setAlarmLauncher: ActivityResultLauncher<Intent>
+    private lateinit var btnDeactivateAlarm: Button
 
     private val alarmReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            // Disable all buttons when the alarm is triggered
-            btnSetAlarm.isEnabled = false
-            btnCancelAlarm.isEnabled = false
-            btnGenerateCode.isEnabled = false
+            // Disable buttons when the alarm is triggered
+            disableAllButtons()
+        }
+    }
+
+    private val enableButtonsReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            // Enable buttons when the code is successfully submitted
+            enableAllButtons()
+            // Check alarm state after enabling buttons
+            val sharedPreferences = getSharedPreferences("alarm_prefs", Context.MODE_PRIVATE)
+            updateButtonState(sharedPreferences)
         }
     }
 
@@ -38,17 +48,15 @@ class MainActivity : AppCompatActivity() {
         btnSetAlarm = findViewById(R.id.btn_set_alarm)
         btnCancelAlarm = findViewById(R.id.btn_cancel_alarm)
         btnGenerateCode = findViewById(R.id.btn_generate_code)
+        btnDeactivateAlarm = findViewById(R.id.btn_deactivate_alarm)
         tvAlarmTime = findViewById(R.id.tv_alarm_time)
 
-        // Set default alarm time display to XX:XX
         val sharedPreferences = getSharedPreferences("alarm_prefs", Context.MODE_PRIVATE)
         val savedTime = sharedPreferences.getString("alarm_time", "XX:XX")
         tvAlarmTime.text = savedTime
 
-        // Check if the alarm is active on app launch
-        if (sharedPreferences.getBoolean("is_alarm_active", false)) {
-            disableAllButtons()
-        }
+        // Check if the alarm is active and update button states
+        updateButtonState(sharedPreferences)
 
         // Register the activity result launcher for setting alarm
         setAlarmLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -63,26 +71,18 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Set an OnClickListener on the Button to launch ActivitySetAlarm
+        // Set OnClickListener for the Set Alarm button
         btnSetAlarm.setOnClickListener {
             val intent = Intent(this, ActivitySetAlarm::class.java)
             setAlarmLauncher.launch(intent)
         }
 
-        // Set an OnClickListener on the Cancel Button to cancel the alarm
+        // Set OnClickListener for Cancel Alarm button
         btnCancelAlarm.setOnClickListener {
             cancelAlarm()
             tvAlarmTime.text = "XX:XX"
-
-            // Enable the buttons when the alarm is canceled
-            enableAllButtons()
-
-            // Update SharedPreferences to indicate alarm is inactive
-            with(sharedPreferences.edit()) {
-                putBoolean("is_alarm_active", false)
-                remove("alarm_time")
-                apply()
-            }
+            enableAllButtons() // Enable buttons when the alarm is canceled
+            updateAlarmStateInPreferences(sharedPreferences, false) // Update state to inactive
         }
 
         // Set OnClickListener for Generate Code button
@@ -90,28 +90,34 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, ActivityGenerateCode::class.java)
             startActivity(intent)
         }
+
+        // Set OnClickListener for Deactivate Alarm button
+        btnDeactivateAlarm.setOnClickListener {
+            val intent = Intent(this, ActivityDeactivateAlarm::class.java)
+            startActivity(intent)
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        // Register the local broadcast receiver
+        // Register the local broadcast receivers
         LocalBroadcastManager.getInstance(this).registerReceiver(
             alarmReceiver, IntentFilter("ALARM_TRIGGERED")
+        )
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            enableButtonsReceiver, IntentFilter("ENABLE_BUTTONS")
         )
 
         // Check if the alarm is active on resume
         val sharedPreferences = getSharedPreferences("alarm_prefs", Context.MODE_PRIVATE)
-        if (sharedPreferences.getBoolean("is_alarm_active", false)) {
-            disableAllButtons()
-        } else {
-            enableAllButtons()
-        }
+        updateButtonState(sharedPreferences)
     }
 
     override fun onPause() {
         super.onPause()
-        // Unregister the local broadcast receiver
+        // Unregister the local broadcast receivers
         LocalBroadcastManager.getInstance(this).unregisterReceiver(alarmReceiver)
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(enableButtonsReceiver)
     }
 
     private fun cancelAlarm() {
@@ -125,15 +131,32 @@ class MainActivity : AppCompatActivity() {
         alarmManager.cancel(pendingIntent)
     }
 
+    private fun updateButtonState(sharedPreferences: SharedPreferences) {
+        if (sharedPreferences.getBoolean("is_alarm_active", false)) {
+            disableAllButtons()
+        } else {
+            enableAllButtons()
+        }
+    }
+
     private fun disableAllButtons() {
         btnSetAlarm.isEnabled = false
         btnCancelAlarm.isEnabled = false
         btnGenerateCode.isEnabled = false
+        btnDeactivateAlarm.isEnabled = true // Enable Deactivate Alarm when alarm is active
     }
 
     private fun enableAllButtons() {
         btnSetAlarm.isEnabled = true
         btnCancelAlarm.isEnabled = true
         btnGenerateCode.isEnabled = true
+        btnDeactivateAlarm.isEnabled = false // Disable Deactivate Alarm when alarm is inactive
+    }
+
+    private fun updateAlarmStateInPreferences(sharedPreferences: SharedPreferences, isActive: Boolean) {
+        with(sharedPreferences.edit()) {
+            putBoolean("is_alarm_active", isActive)
+            apply()
+        }
     }
 }
