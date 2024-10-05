@@ -65,7 +65,6 @@ class ActivitySetAlarm : AppCompatActivity() {
 
         // Show a toast message
         val alarmTimeText = String.format("%02d:%02d", timePicker.hour, timePicker.minute)
-        Toast.makeText(this, "Alarm set for: $alarmTimeText", Toast.LENGTH_SHORT).show()
 
         // Pass the alarm time back to MainActivity
         val resultIntent = Intent()

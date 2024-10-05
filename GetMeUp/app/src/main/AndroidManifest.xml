@@ -31,6 +31,8 @@
 
         <activity android:name=".ActivitySetAlarm" />
 
+        <activity android:name=".ActivityGenerateCode" />
+
         <service
             android:name=".AlarmService"
             android:foregroundServiceType="mediaPlayback"/>
