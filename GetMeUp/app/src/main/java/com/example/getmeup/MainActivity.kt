@@ -55,8 +55,15 @@ class MainActivity : AppCompatActivity() {
         val savedTime = sharedPreferences.getString("alarm_time", "XX:XX")
         tvAlarmTime.text = savedTime
 
-        // Check if the alarm is active and update button states
-        updateButtonState(sharedPreferences)
+        // Check if alarm_code is present
+        val alarmCode = sharedPreferences.getString("alarm_code", null)
+        if (alarmCode.isNullOrEmpty()) {
+            // Disable all buttons except Generate Code
+            disableAllButtonsExceptGenerateCode()
+        } else {
+            // Enable/Disable buttons based on alarm state
+            updateButtonState(sharedPreferences)
+        }
 
         // Register the activity result launcher for setting alarm
         setAlarmLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -108,9 +115,14 @@ class MainActivity : AppCompatActivity() {
             enableButtonsReceiver, IntentFilter("ENABLE_BUTTONS")
         )
 
-        // Check if the alarm is active on resume
+        // Check again if alarm_code is present when resuming
         val sharedPreferences = getSharedPreferences("alarm_prefs", Context.MODE_PRIVATE)
-        updateButtonState(sharedPreferences)
+        val alarmCode = sharedPreferences.getString("alarm_code", null)
+        if (alarmCode.isNullOrEmpty()) {
+            disableAllButtonsExceptGenerateCode()
+        } else {
+            updateButtonState(sharedPreferences)
+        }
     }
 
     override fun onPause() {
@@ -151,6 +163,13 @@ class MainActivity : AppCompatActivity() {
         btnCancelAlarm.isEnabled = true
         btnGenerateCode.isEnabled = true
         btnDeactivateAlarm.isEnabled = false // Disable Deactivate Alarm when alarm is inactive
+    }
+
+    private fun disableAllButtonsExceptGenerateCode() {
+        btnSetAlarm.isEnabled = false
+        btnCancelAlarm.isEnabled = false
+        btnGenerateCode.isEnabled = true // Only Generate Code button enabled
+        btnDeactivateAlarm.isEnabled = false
     }
 
     private fun updateAlarmStateInPreferences(sharedPreferences: SharedPreferences, isActive: Boolean) {
