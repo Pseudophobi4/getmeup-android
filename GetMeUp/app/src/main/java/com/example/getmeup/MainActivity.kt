@@ -158,9 +158,13 @@ class MainActivity : AppCompatActivity() {
         val savedVolume = sharedPreferences.getFloat("alarm_volume", 100f) // Default to 100 if not set
         volumeSlider.value = savedVolume
 
-        // Set the alarm volume to match the slider value
-        val volumeLevel = (savedVolume / 100 * audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)).toInt()
-        audioManager.setStreamVolume(AudioManager.STREAM_ALARM, volumeLevel, 0)
+        // Check if the alarm is NOT active before setting the alarm volume
+        val isAlarmActive = sharedPreferences.getBoolean("is_alarm_active", false)
+        if (!isAlarmActive) {
+            // Set the alarm volume to match the slider value
+            val volumeLevel = (savedVolume / 100 * audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)).toInt()
+            audioManager.setStreamVolume(AudioManager.STREAM_ALARM, volumeLevel, 0)
+        }
     }
 
     override fun onPause() {
