@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import java.util.Calendar
 
-class ActivityDeactivateAlarm : AppCompatActivity() {
+class DeactivateAlarmActivity : AppCompatActivity() {
 
     private lateinit var etCodeInput: EditText
     private lateinit var btnSubmit: Button
@@ -32,7 +32,7 @@ class ActivityDeactivateAlarm : AppCompatActivity() {
             val correctCode = sharedPreferences.getString("alarm_code", "")
 
             // Log codes for debugging
-            Log.d("ActivityDeactivateAlarm", "Input Code: $inputCode, Correct Code: $correctCode")
+            Log.d("DeactivateAlarmActivity", "Input Code: $inputCode, Correct Code: $correctCode")
 
             // Check if the input code matches the stored code
             if (inputCode == correctCode) {

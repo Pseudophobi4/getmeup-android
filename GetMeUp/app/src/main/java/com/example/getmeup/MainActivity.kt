@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity() {
 
         // Set OnClickListener for the Set Alarm button
         btnSetAlarm.setOnClickListener {
-            val intent = Intent(this, ActivitySetAlarm::class.java)
+            val intent = Intent(this, SetAlarmActivity::class.java)
             setAlarmLauncher.launch(intent)
         }
 
@@ -108,13 +108,13 @@ class MainActivity : AppCompatActivity() {
 
         // Set OnClickListener for Generate Code button
         btnGenerateCode.setOnClickListener {
-            val intent = Intent(this, ActivityGenerateCode::class.java)
+            val intent = Intent(this, GenerateCodeActivity::class.java)
             startActivity(intent)
         }
 
         // Set OnClickListener for Deactivate Alarm button
         btnDeactivateAlarm.setOnClickListener {
-            val intent = Intent(this, ActivityDeactivateAlarm::class.java)
+            val intent = Intent(this, DeactivateAlarmActivity::class.java)
             startActivity(intent)
         }
 

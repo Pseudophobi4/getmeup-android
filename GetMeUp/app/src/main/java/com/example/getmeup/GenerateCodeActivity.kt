@@ -7,7 +7,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import java.util.*
 
-class ActivityGenerateCode : AppCompatActivity() {
+class GenerateCodeActivity : AppCompatActivity() {
 
     private lateinit var tvCodeValue: TextView
     private lateinit var btnGenerateCode: Button

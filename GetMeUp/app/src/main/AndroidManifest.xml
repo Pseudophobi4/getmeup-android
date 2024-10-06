@@ -29,11 +29,11 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ActivitySetAlarm" />
+        <activity android:name=".SetAlarmActivity" />
 
-        <activity android:name=".ActivityGenerateCode" />
+        <activity android:name=".GenerateCodeActivity" />
 
-        <activity android:name=".ActivityDeactivateAlarm" />
+        <activity android:name=".DeactivateAlarmActivity" />
 
         <service
             android:name=".AlarmService"

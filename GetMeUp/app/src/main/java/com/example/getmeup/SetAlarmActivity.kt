@@ -18,7 +18,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import java.util.*
 
-class ActivitySetAlarm : AppCompatActivity() {
+class SetAlarmActivity : AppCompatActivity() {
 
     private lateinit var timePicker: TimePicker
     private lateinit var btnConfirmAlarm: Button
