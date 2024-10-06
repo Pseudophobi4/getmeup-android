@@ -14,6 +14,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -52,8 +53,9 @@ class MainActivity : AppCompatActivity() {
         tvAlarmTime = findViewById(R.id.tv_alarm_time)
 
         val sharedPreferences = getSharedPreferences("alarm_prefs", Context.MODE_PRIVATE)
-        val savedTime = sharedPreferences.getString("alarm_time", "XX:XX")
-        tvAlarmTime.text = savedTime
+        val savedTime = sharedPreferences.getString("alarm_time", "OFF")
+        val militaryTime = savedTime ?: "OFF"
+        tvAlarmTime.text = convertMilitaryTimeTo12HourFormat(militaryTime)
 
         // Check if alarm_code is present
         val alarmCode = sharedPreferences.getString("alarm_code", null)
@@ -69,7 +71,7 @@ class MainActivity : AppCompatActivity() {
         setAlarmLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 val alarmTime = result.data?.getStringExtra("alarm_time")
-                tvAlarmTime.text = alarmTime ?: "XX:XX"
+                tvAlarmTime.text = alarmTime ?: "OFF"
 
                 with(sharedPreferences.edit()) {
                     putString("alarm_time", alarmTime)
@@ -87,7 +89,7 @@ class MainActivity : AppCompatActivity() {
         // Set OnClickListener for Cancel Alarm button
         btnCancelAlarm.setOnClickListener {
             cancelAlarm()
-            tvAlarmTime.text = "XX:XX"
+            tvAlarmTime.text = "OFF"
             enableAllButtons() // Enable buttons when the alarm is canceled
             updateAlarmStateInPreferences(sharedPreferences, false) // Update state to inactive
         }
@@ -123,6 +125,10 @@ class MainActivity : AppCompatActivity() {
         } else {
             updateButtonState(sharedPreferences)
         }
+
+        // Update the displayed alarm time in 12-hour format
+        val savedTime = sharedPreferences.getString("alarm_time", "XX:XX") ?: "XX:XX"
+        tvAlarmTime.text = convertMilitaryTimeTo12HourFormat(savedTime)
     }
 
     override fun onPause() {
@@ -177,5 +183,25 @@ class MainActivity : AppCompatActivity() {
             putBoolean("is_alarm_active", isActive)
             apply()
         }
+    }
+
+    private fun convertMilitaryTimeTo12HourFormat(militaryTime: String): String {
+        // Check if the time is "OFF" and return it unchanged
+        if (militaryTime == "OFF") {
+            return militaryTime
+        }
+
+        val parts = militaryTime.split(":")
+        if (parts.size != 2) {
+            return militaryTime // Return the original time if the format is incorrect
+        }
+
+        val hour = parts[0].toInt()
+        val minute = parts[1]
+        val amPm = if (hour >= 12) "PM" else "AM"
+        val formattedHour = if (hour % 12 == 0) 12 else hour % 12
+
+        // Specify Locale for formatting
+        return String.format(Locale.getDefault(), "%02d:%s %s", formattedHour, minute, amPm)
     }
 }
