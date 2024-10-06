@@ -5,8 +5,11 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.media.AudioAttributes
+import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.IBinder
@@ -15,9 +18,13 @@ import androidx.core.app.NotificationCompat
 class AlarmService : Service() {
     private lateinit var mediaPlayer: MediaPlayer
     private val CHANNEL_ID = "AlarmServiceChannel"
+    private lateinit var audioManager: AudioManager
+    private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreate() {
         super.onCreate()
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        sharedPreferences = getSharedPreferences("alarm_prefs", Context.MODE_PRIVATE)
 
         // Set up AudioAttributes for alarm sounds
         val audioAttributes = AudioAttributes.Builder()
@@ -35,6 +42,9 @@ class AlarmService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // Set the alarm volume when the alarm starts ringing
+        setAlarmVolume()
+
         // Create the notification and run the service in the foreground
         createNotificationChannel()  // For Android O and higher
         val notificationIntent = Intent(this, MainActivity::class.java)
@@ -85,5 +95,12 @@ class AlarmService : Service() {
             val manager: NotificationManager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
         }
+    }
+
+    private fun setAlarmVolume() {
+        // Retrieve the saved volume from SharedPreferences
+        val savedVolume = sharedPreferences.getFloat("alarm_volume", 100f) // Default to 100 if not set
+        val volumeLevel = (savedVolume / 100 * audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)).toInt()
+        audioManager.setStreamVolume(AudioManager.STREAM_ALARM, volumeLevel, 0)
     }
 }

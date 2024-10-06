@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.SharedPreferences
+import android.media.AudioManager
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
@@ -14,6 +15,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import com.google.android.material.slider.Slider
 import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
@@ -24,6 +26,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvAlarmTime: TextView
     private lateinit var setAlarmLauncher: ActivityResultLauncher<Intent>
     private lateinit var btnDeactivateAlarm: Button
+    private lateinit var volumeSlider: Slider
+    private lateinit var audioManager: AudioManager
 
     private val alarmReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -46,16 +50,24 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Initialize AudioManager
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
         btnSetAlarm = findViewById(R.id.btn_set_alarm)
         btnCancelAlarm = findViewById(R.id.btn_cancel_alarm)
         btnGenerateCode = findViewById(R.id.btn_generate_code)
         btnDeactivateAlarm = findViewById(R.id.btn_deactivate_alarm)
         tvAlarmTime = findViewById(R.id.tv_alarm_time)
+        volumeSlider = findViewById(R.id.volume_slider)
 
         val sharedPreferences = getSharedPreferences("alarm_prefs", Context.MODE_PRIVATE)
         val savedTime = sharedPreferences.getString("alarm_time", "OFF")
         val militaryTime = savedTime ?: "OFF"
         tvAlarmTime.text = convertMilitaryTimeTo12HourFormat(militaryTime)
+
+        // Set the slider value from SharedPreferences
+        val savedVolume = sharedPreferences.getFloat("alarm_volume", 100f) // Default to 100 if not set
+        volumeSlider.value = savedVolume
 
         // Check if alarm_code is present
         val alarmCode = sharedPreferences.getString("alarm_code", null)
@@ -105,6 +117,18 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, ActivityDeactivateAlarm::class.java)
             startActivity(intent)
         }
+
+        // Set an OnChangeListener to update SharedPreferences when the slider value changes
+        volumeSlider.addOnChangeListener { slider, value, fromUser ->
+            val volumeLevel = (value / 100 * audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)).toInt()
+            audioManager.setStreamVolume(AudioManager.STREAM_ALARM, volumeLevel, 0)
+
+            // Save the slider value in SharedPreferences
+            with(sharedPreferences.edit()) {
+                putFloat("alarm_volume", value)
+                apply()
+            }
+        }
     }
 
     override fun onResume() {
@@ -129,6 +153,14 @@ class MainActivity : AppCompatActivity() {
         // Update the displayed alarm time in 12-hour format
         val savedTime = sharedPreferences.getString("alarm_time", "OFF") ?: "OFF"
         tvAlarmTime.text = convertMilitaryTimeTo12HourFormat(savedTime)
+
+        // Restore the slider value from SharedPreferences
+        val savedVolume = sharedPreferences.getFloat("alarm_volume", 100f) // Default to 100 if not set
+        volumeSlider.value = savedVolume
+
+        // Set the alarm volume to match the slider value
+        val volumeLevel = (savedVolume / 100 * audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)).toInt()
+        audioManager.setStreamVolume(AudioManager.STREAM_ALARM, volumeLevel, 0)
     }
 
     override fun onPause() {
@@ -162,6 +194,7 @@ class MainActivity : AppCompatActivity() {
         btnCancelAlarm.isEnabled = false
         btnGenerateCode.isEnabled = false
         btnDeactivateAlarm.isEnabled = true // Enable Deactivate Alarm when alarm is active
+        volumeSlider.isEnabled = false
     }
 
     private fun enableAllButtons() {
@@ -169,6 +202,7 @@ class MainActivity : AppCompatActivity() {
         btnCancelAlarm.isEnabled = true
         btnGenerateCode.isEnabled = true
         btnDeactivateAlarm.isEnabled = false // Disable Deactivate Alarm when alarm is inactive
+        volumeSlider.isEnabled = true
     }
 
     private fun disableAllButtonsExceptGenerateCode() {
@@ -176,6 +210,7 @@ class MainActivity : AppCompatActivity() {
         btnCancelAlarm.isEnabled = false
         btnGenerateCode.isEnabled = true // Only Generate Code button enabled
         btnDeactivateAlarm.isEnabled = false
+        volumeSlider.isEnabled = false
     }
 
     private fun updateAlarmStateInPreferences(sharedPreferences: SharedPreferences, isActive: Boolean) {
