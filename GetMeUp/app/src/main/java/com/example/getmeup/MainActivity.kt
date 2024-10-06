@@ -127,7 +127,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Update the displayed alarm time in 12-hour format
-        val savedTime = sharedPreferences.getString("alarm_time", "XX:XX") ?: "XX:XX"
+        val savedTime = sharedPreferences.getString("alarm_time", "OFF") ?: "OFF"
         tvAlarmTime.text = convertMilitaryTimeTo12HourFormat(savedTime)
     }
 
