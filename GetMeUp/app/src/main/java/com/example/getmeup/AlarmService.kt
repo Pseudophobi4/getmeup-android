@@ -14,7 +14,6 @@ import android.media.MediaPlayer
 import android.os.Build
 import android.os.IBinder
 import android.os.VibrationEffect
-import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.core.app.NotificationCompat
 
@@ -24,6 +23,7 @@ class AlarmService : Service() {
     private lateinit var audioManager: AudioManager
     private lateinit var sharedPreferences: SharedPreferences
     private var vibratorManager: VibratorManager? = null // VibratorManager for vibration control
+    private val NOTIFICATION_ID = 1 // Notification ID for cancellation
 
     override fun onCreate() {
         super.onCreate()
@@ -70,7 +70,7 @@ class AlarmService : Service() {
             .build()
 
         // Start the service in the foreground
-        startForeground(1, notification)
+        startForeground(NOTIFICATION_ID, notification)
 
         // Start the media player
         mediaPlayer.start()
@@ -94,6 +94,10 @@ class AlarmService : Service() {
 
         // Stop the vibration
         stopVibration()
+
+        // Clear the notification
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(NOTIFICATION_ID) // Cancel the notification with the specific ID
     }
 
     // Create notification channel for Android O and above
