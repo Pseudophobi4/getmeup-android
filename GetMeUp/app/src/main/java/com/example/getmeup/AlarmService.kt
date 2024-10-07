@@ -13,6 +13,9 @@ import android.media.AudioManager
 import android.media.MediaPlayer
 import android.os.Build
 import android.os.IBinder
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import androidx.core.app.NotificationCompat
 
 class AlarmService : Service() {
@@ -20,6 +23,7 @@ class AlarmService : Service() {
     private val CHANNEL_ID = "AlarmServiceChannel"
     private lateinit var audioManager: AudioManager
     private lateinit var sharedPreferences: SharedPreferences
+    private var vibratorManager: VibratorManager? = null // VibratorManager for vibration control
 
     override fun onCreate() {
         super.onCreate()
@@ -38,6 +42,11 @@ class AlarmService : Service() {
             setDataSource(applicationContext, android.net.Uri.parse("android.resource://${packageName}/raw/alarm_sound")) // Replace with your sound resource
             isLooping = true // Set to loop the sound
             prepare() // Prepare the media player for playback
+        }
+
+        // Initialize the VibratorManager (for Android 12 and above)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
         }
     }
 
@@ -66,6 +75,9 @@ class AlarmService : Service() {
         // Start the media player
         mediaPlayer.start()
 
+        // Start the vibration if supported
+        startVibration()
+
         return START_STICKY
     }
 
@@ -79,6 +91,9 @@ class AlarmService : Service() {
             mediaPlayer.stop()
         }
         mediaPlayer.release()
+
+        // Stop the vibration
+        stopVibration()
     }
 
     // Create notification channel for Android O and above
@@ -102,5 +117,24 @@ class AlarmService : Service() {
         val savedVolume = sharedPreferences.getFloat("alarm_volume", 100f) // Default to 100 if not set
         val volumeLevel = (savedVolume / 100 * audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM)).toInt()
         audioManager.setStreamVolume(AudioManager.STREAM_ALARM, volumeLevel, 0)
+    }
+
+    // Start vibration using VibratorManager with a built-in pattern
+    private fun startVibration() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // Use a predefined vibration effect for a simple repeating pattern
+            val vibrationEffect = VibrationEffect.createWaveform(
+                longArrayOf(0, 500, 500), // Pattern: wait 0ms, vibrate 500ms, pause 500ms
+                0 // Repeat indefinitely
+            )
+            vibratorManager?.defaultVibrator?.vibrate(vibrationEffect) // Use defaultVibrator
+        }
+    }
+
+    // Stop vibration
+    private fun stopVibration() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            vibratorManager?.defaultVibrator?.cancel() // Use defaultVibrator to stop vibration
+        }
     }
 }
