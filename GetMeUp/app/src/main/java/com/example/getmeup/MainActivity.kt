@@ -101,9 +101,13 @@ class MainActivity : AppCompatActivity() {
         // Set OnClickListener for Cancel Alarm button
         btnCancelAlarm.setOnClickListener {
             cancelAlarm()
-            tvAlarmTime.text = "OFF"
-            enableAllButtons() // Enable buttons when the alarm is canceled
-            updateAlarmStateInPreferences(sharedPreferences, false) // Update state to inactive
+            tvAlarmTime.text = "OFF" // Update the TextView to show "OFF"
+
+            // Update the alarm state and time in SharedPreferences
+            with(sharedPreferences.edit()) {
+                putString("alarm_time", "OFF") // Set alarm_time to "OFF"
+                apply()
+            }
         }
 
         // Set OnClickListener for Generate Code button
@@ -215,13 +219,6 @@ class MainActivity : AppCompatActivity() {
         btnGenerateCode.isEnabled = true // Only Generate Code button enabled
         btnDeactivateAlarm.isEnabled = false
         volumeSlider.isEnabled = false
-    }
-
-    private fun updateAlarmStateInPreferences(sharedPreferences: SharedPreferences, isActive: Boolean) {
-        with(sharedPreferences.edit()) {
-            putBoolean("is_alarm_active", isActive)
-            apply()
-        }
     }
 
     private fun convertMilitaryTimeTo12HourFormat(militaryTime: String): String {
