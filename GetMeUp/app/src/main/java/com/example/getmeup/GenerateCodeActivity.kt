@@ -24,16 +24,37 @@ class GenerateCodeActivity : AppCompatActivity() {
         btnGenerateCode = findViewById(R.id.btn_generate_code)
         btnToggleVisibility = findViewById(R.id.btn_toggle_visibility) // Button to toggle visibility
 
-        // Retrieve the stored code from SharedPreferences, if available
+        // Retrieve the stored code from SharedPreferences
         val sharedPreferences = getSharedPreferences("alarm_prefs", Context.MODE_PRIVATE)
         val savedCode = sharedPreferences.getString("alarm_code", "")
-        tvCodeValue.text = savedCode ?: "No code generated"
 
-        // Initially hide the code
-        tvCodeValue.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+        // Check if the savedCode is empty or null, and if so, generate a new one
+        if (savedCode.isNullOrEmpty()) {
+            val generatedCode = generateRandomCode(4)
+            tvCodeValue.text = generatedCode
+
+            // Show the new code
+            tvCodeValue.transformationMethod = null
+            btnToggleVisibility.text = "Hide"
+            isCodeVisible = true
+
+            // Store the generated code in SharedPreferences
+            with(sharedPreferences.edit()) {
+                putString("alarm_code", generatedCode)
+                apply()
+            }
+        } else {
+            // Use the saved code
+            tvCodeValue.text = savedCode
+        }
+
+        // Initially hide the code if one was loaded from SharedPreferences
+        if (!isCodeVisible) {
+            tvCodeValue.transformationMethod = android.text.method.PasswordTransformationMethod.getInstance()
+        }
 
         btnGenerateCode.setOnClickListener {
-            showMaterialConfirmationDialog(sharedPreferences) // Show Material Design dialog before generating code
+            showMaterialConfirmationDialog(sharedPreferences) // Show Material Design dialog before generating a new code
         }
 
         btnToggleVisibility.setOnClickListener {
@@ -66,10 +87,7 @@ class GenerateCodeActivity : AppCompatActivity() {
                 // Show the new code
                 tvCodeValue.transformationMethod = null
                 btnToggleVisibility.text = "Hide"
-
-                if (!isCodeVisible) {
-                    isCodeVisible = true
-                }
+                isCodeVisible = true
 
                 // Store the generated code in SharedPreferences
                 with(sharedPreferences.edit()) {
