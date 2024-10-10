@@ -61,9 +61,7 @@ class SetAlarmActivity : AppCompatActivity() {
         val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
         // Set the alarm
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
-
-        // Show a toast message
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
         val alarmTimeText = String.format("%02d:%02d", timePicker.hour, timePicker.minute)
 
         // Pass the alarm time back to MainActivity

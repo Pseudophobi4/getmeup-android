@@ -72,7 +72,7 @@ class DeactivateAlarmActivity : AppCompatActivity() {
                     }
 
                     // Set the alarm again
-                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, alarmCalendar.timeInMillis, pendingIntent)
+                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmCalendar.timeInMillis, pendingIntent)
                 }
 
                 // Update alarm state in preferences
