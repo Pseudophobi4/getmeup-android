@@ -30,7 +30,7 @@ class GenerateCodeActivity : AppCompatActivity() {
 
         // Check if the savedCode is empty or null, and if so, generate a new one
         if (savedCode.isNullOrEmpty()) {
-            val generatedCode = generateRandomCode(4)
+            val generatedCode = generateRandomCode(8)
             tvCodeValue.text = generatedCode
 
             // Show the new code
@@ -64,7 +64,7 @@ class GenerateCodeActivity : AppCompatActivity() {
 
     // Function to generate a random 4-character string with numbers and uppercase letters
     private fun generateRandomCode(length: Int): String {
-        val charPool = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+        val charPool = "0123456789abcdefghijklmnopqrstuvwxyz"
         val random = Random()
         val code = StringBuilder()
 
