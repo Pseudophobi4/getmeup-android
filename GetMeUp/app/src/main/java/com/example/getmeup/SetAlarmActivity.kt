@@ -32,6 +32,23 @@ class SetAlarmActivity : AppCompatActivity() {
         btnConfirmAlarm = findViewById(R.id.btn_confirm_alarm)
         alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
+        // Check for existing alarm time in SharedPreferences
+        val sharedPreferences = getSharedPreferences("alarm_prefs", Context.MODE_PRIVATE)
+        val savedTime = sharedPreferences.getString("alarm_time", null)
+
+        if (savedTime != null && savedTime != "OFF") {
+            // Split the saved time into hours and minutes
+            val timeParts = savedTime.split(":")
+            if (timeParts.size == 2) {
+                val hour = timeParts[0].toInt()
+                val minute = timeParts[1].toInt()
+
+                // Set the TimePicker to the saved alarm time
+                timePicker.hour = hour
+                timePicker.minute = minute
+            }
+        }
+
         btnConfirmAlarm.setOnClickListener {
             // Request notification permission if not granted
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
