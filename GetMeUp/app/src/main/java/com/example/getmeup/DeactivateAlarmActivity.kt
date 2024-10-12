@@ -25,6 +25,9 @@ class DeactivateAlarmActivity : AppCompatActivity() {
         etCodeInput = findViewById(R.id.editTextCode)
         btnSubmit = findViewById(R.id.buttonSubmit)
 
+        // Focus editText
+        etCodeInput.requestFocus()
+
         // Set an OnClickListener for the submit button
         btnSubmit.setOnClickListener {
             val inputCode = etCodeInput.text.toString()

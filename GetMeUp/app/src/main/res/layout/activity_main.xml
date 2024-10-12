@@ -6,75 +6,100 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <!-- Button to set alarm -->
     <Button
         android:id="@+id/btn_set_alarm"
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="Set Alarm"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:text="Set"
+        app:layout_constraintEnd_toStartOf="@+id/btn_cancel_alarm"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/volume_slider" />
 
-    <!-- TextView to show the current alarm time -->
     <TextView
         android:id="@+id/tv_alarm_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="8dp"
         android:text="OFF"
-        android:textSize="18sp"
+        android:textSize="60sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btn_set_alarm" />
+        app:layout_constraintTop_toBottomOf="@+id/tv_alarm_label" />
 
-    <!-- Button to cancel the alarm -->
     <Button
         android:id="@+id/btn_cancel_alarm"
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="Cancel Alarm"
+        android:text="Cancel"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_alarm_time" />
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/btn_set_alarm"
+        app:layout_constraintTop_toBottomOf="@+id/volume_slider" />
 
-    <!-- Button to generate code -->
     <Button
         android:id="@+id/btn_generate_code"
-        android:layout_width="wrap_content"
+        android:layout_width="170dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
         android:text="Deactivation Code"
+        app:layout_constraintBottom_toTopOf="@+id/btn_deactivate_alarm"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btn_cancel_alarm" />
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- Button to deactivate alarm -->
     <Button
         android:id="@+id/btn_deactivate_alarm"
-        android:layout_width="wrap_content"
+        android:layout_width="170dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
         android:text="Deactivate Alarm"
+        app:layout_constraintBottom_toTopOf="@+id/btn_exit"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btn_generate_code" />
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- Slider to control alarm volume -->
     <com.google.android.material.slider.Slider
         android:id="@+id/volume_slider"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:value="50.0"
         android:valueFrom="0.0"
         android:valueTo="100.0"
         app:labelBehavior="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_deactivate_alarm" /> <!-- Set a default volume level -->
+        app:layout_constraintTop_toBottomOf="@+id/tv_alarm_time" />
+
+    <TextView
+        android:id="@+id/tv_alarm_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="64dp"
+        android:text="ALARM"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btn_exit"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="64dp"
+        android:text="Exit"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

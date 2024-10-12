@@ -64,7 +64,7 @@ class GenerateCodeActivity : AppCompatActivity() {
 
     // Function to generate a random 4-character string with numbers and uppercase letters
     private fun generateRandomCode(length: Int): String {
-        val charPool = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        val charPool = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
         val random = Random()
         val code = StringBuilder()
 
@@ -81,7 +81,7 @@ class GenerateCodeActivity : AppCompatActivity() {
         MaterialAlertDialogBuilder(this)
             .setMessage("Are you sure you want to generate a new code? This will overwrite the existing one.")
             .setPositiveButton("Yes") { dialog, _ ->
-                val generatedCode = generateRandomCode(4)
+                val generatedCode = generateRandomCode(8)
                 tvCodeValue.text = generatedCode
 
                 // Show the new code
