@@ -22,6 +22,7 @@ class SetAlarmActivity : AppCompatActivity() {
 
     private lateinit var timePicker: TimePicker
     private lateinit var btnConfirmAlarm: Button
+    private lateinit var btnBack: Button
     private lateinit var alarmManager: AlarmManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,6 +31,7 @@ class SetAlarmActivity : AppCompatActivity() {
 
         timePicker = findViewById(R.id.timePicker)
         btnConfirmAlarm = findViewById(R.id.btn_confirm_alarm)
+        btnBack = findViewById(R.id.btn_back)
         alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
         // Check for existing alarm time in SharedPreferences
@@ -56,6 +58,11 @@ class SetAlarmActivity : AppCompatActivity() {
             } else {
                 setAlarm()
             }
+        }
+
+        btnBack.setOnClickListener {
+            // Finish the current activity and go back to the previous one
+            finish()
         }
 
         // Create the notification channel

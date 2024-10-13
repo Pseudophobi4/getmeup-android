@@ -28,6 +28,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnDeactivateAlarm: Button
     private lateinit var volumeSlider: Slider
     private lateinit var audioManager: AudioManager
+    private lateinit var btnExit: Button
 
     private val alarmReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -59,6 +60,7 @@ class MainActivity : AppCompatActivity() {
         btnDeactivateAlarm = findViewById(R.id.btn_deactivate_alarm)
         tvAlarmTime = findViewById(R.id.tv_alarm_time)
         volumeSlider = findViewById(R.id.volume_slider)
+        btnExit = findViewById(R.id.btn_exit)
 
         val sharedPreferences = getSharedPreferences("alarm_prefs", Context.MODE_PRIVATE)
         val savedTime = sharedPreferences.getString("alarm_time", "OFF")
@@ -133,6 +135,12 @@ class MainActivity : AppCompatActivity() {
                 apply()
             }
         }
+
+        // Set OnClickListener for the Exit button
+        btnExit.setOnClickListener {
+            // Exit the app
+            finishAffinity() // Closes all activities and exits the app
+        }
     }
 
     override fun onResume() {
@@ -203,6 +211,7 @@ class MainActivity : AppCompatActivity() {
         btnGenerateCode.isEnabled = false
         btnDeactivateAlarm.isEnabled = true // Enable Deactivate Alarm when alarm is active
         volumeSlider.isEnabled = false
+        btnExit.isEnabled = true
     }
 
     private fun enableAllButtons() {
@@ -211,6 +220,7 @@ class MainActivity : AppCompatActivity() {
         btnGenerateCode.isEnabled = true
         btnDeactivateAlarm.isEnabled = false // Disable Deactivate Alarm when alarm is inactive
         volumeSlider.isEnabled = true
+        btnExit.isEnabled = true
     }
 
     private fun disableAllButtonsExceptGenerateCode() {
@@ -219,6 +229,7 @@ class MainActivity : AppCompatActivity() {
         btnGenerateCode.isEnabled = true // Only Generate Code button enabled
         btnDeactivateAlarm.isEnabled = false
         volumeSlider.isEnabled = false
+        btnExit.isEnabled = true
     }
 
     private fun convertMilitaryTimeTo12HourFormat(militaryTime: String): String {

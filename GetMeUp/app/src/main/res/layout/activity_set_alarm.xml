@@ -33,7 +33,7 @@
         android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="64dp"
-        android:text="Back"
+        android:text="Cancel"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"

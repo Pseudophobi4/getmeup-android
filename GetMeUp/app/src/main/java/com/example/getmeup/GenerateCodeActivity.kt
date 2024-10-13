@@ -14,6 +14,7 @@ class GenerateCodeActivity : AppCompatActivity() {
     private lateinit var tvCodeValue: TextView
     private lateinit var btnGenerateCode: Button
     private lateinit var btnToggleVisibility: Button
+    private lateinit var btnBack: Button
     private var isCodeVisible = false // Track visibility state
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,6 +24,7 @@ class GenerateCodeActivity : AppCompatActivity() {
         tvCodeValue = findViewById(R.id.tv_code_value)
         btnGenerateCode = findViewById(R.id.btn_generate_code)
         btnToggleVisibility = findViewById(R.id.btn_toggle_visibility) // Button to toggle visibility
+        btnBack = findViewById(R.id.btn_back)
 
         // Retrieve the stored code from SharedPreferences
         val sharedPreferences = getSharedPreferences("alarm_prefs", Context.MODE_PRIVATE)
@@ -60,11 +62,16 @@ class GenerateCodeActivity : AppCompatActivity() {
         btnToggleVisibility.setOnClickListener {
             toggleCodeVisibility()
         }
+
+        btnBack.setOnClickListener {
+            // Finish the current activity and go back to the previous one
+            finish()
+        }
     }
 
     // Function to generate a random 4-character string with numbers and uppercase letters
     private fun generateRandomCode(length: Int): String {
-        val charPool = "0123456789abcdefghijklmnopqrstuvwxyz"
+        val charPool = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
         val random = Random()
         val code = StringBuilder()
 
@@ -79,7 +86,8 @@ class GenerateCodeActivity : AppCompatActivity() {
     // Function to show a Material Design confirmation dialog before generating a new code
     private fun showMaterialConfirmationDialog(sharedPreferences: SharedPreferences) {
         MaterialAlertDialogBuilder(this)
-            .setMessage("Are you sure you want to generate a new code? This will overwrite the existing one.")
+            .setTitle("Confirmation")
+            .setMessage("Do you want to generate a new code?")
             .setPositiveButton("Yes") { dialog, _ ->
                 val generatedCode = generateRandomCode(8)
                 tvCodeValue.text = generatedCode

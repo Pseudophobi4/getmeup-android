@@ -17,6 +17,7 @@ class DeactivateAlarmActivity : AppCompatActivity() {
 
     private lateinit var etCodeInput: EditText
     private lateinit var btnSubmit: Button
+    private lateinit var btnBack: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,6 +25,7 @@ class DeactivateAlarmActivity : AppCompatActivity() {
 
         etCodeInput = findViewById(R.id.editTextCode)
         btnSubmit = findViewById(R.id.buttonSubmit)
+        btnBack = findViewById(R.id.btn_back)
 
         // Focus editText
         etCodeInput.requestFocus()
@@ -84,9 +86,6 @@ class DeactivateAlarmActivity : AppCompatActivity() {
                     apply()
                 }
 
-                // Show success message
-                Toast.makeText(this, "Alarm deactivated and rescheduled!", Toast.LENGTH_SHORT).show()
-
                 // Send broadcast to enable buttons in MainActivity
                 val enableButtonsIntent = Intent("ENABLE_BUTTONS")
                 LocalBroadcastManager.getInstance(this).sendBroadcast(enableButtonsIntent)
@@ -97,6 +96,11 @@ class DeactivateAlarmActivity : AppCompatActivity() {
                 // Show error message
                 Toast.makeText(this, "Incorrect code. Please try again.", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        btnBack.setOnClickListener {
+            // Finish the current activity and go back to the previous one
+            finish()
         }
     }
 }
