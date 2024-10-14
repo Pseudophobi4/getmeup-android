@@ -3,6 +3,7 @@ package com.example.getmeup
 import android.app.*
 import android.content.*
 import android.media.*
+import android.os.Binder
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
@@ -113,7 +114,16 @@ class AlarmService : Service() {
         notificationManager.cancel(NOTIFICATION_ID)
     }
 
-    override fun onBind(intent: Intent?): IBinder? = null
+    // Expose the MediaPlayer to DeactivateAlarmActivity
+    inner class AlarmBinder : Binder() {
+        fun getMediaPlayer(): MediaPlayer {
+            return mediaPlayer
+        }
+    }
+
+    override fun onBind(intent: Intent?): IBinder {
+        return AlarmBinder() // Return the AlarmBinder instance
+    }
 
     private fun createNotificationChannel() {
         val channel = NotificationChannel(

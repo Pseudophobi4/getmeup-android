@@ -2,15 +2,22 @@ package com.example.getmeup
 
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
+import android.media.MediaPlayer
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.IBinder
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import java.io.IOException
 import java.util.Calendar
 
 class DeactivateAlarmActivity : AppCompatActivity() {
@@ -18,6 +25,9 @@ class DeactivateAlarmActivity : AppCompatActivity() {
     private lateinit var etCodeInput: EditText
     private lateinit var btnSubmit: Button
     private lateinit var btnBack: Button
+    private lateinit var btnPause: Button // New button for pausing
+    private lateinit var mediaPlayer: MediaPlayer // Declare MediaPlayer variable
+    private val handler = Handler(Looper.getMainLooper()) // Updated Handler instantiation
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,9 +36,14 @@ class DeactivateAlarmActivity : AppCompatActivity() {
         etCodeInput = findViewById(R.id.editTextCode)
         btnSubmit = findViewById(R.id.buttonSubmit)
         btnBack = findViewById(R.id.btn_back)
+        btnPause = findViewById(R.id.buttonPause) // Initialize new button
 
         // Focus editText
         etCodeInput.requestFocus()
+
+        // Get reference to the MediaPlayer from AlarmService
+        val serviceIntent = Intent(this, AlarmService::class.java)
+        bindService(serviceIntent, serviceConnection, Context.BIND_AUTO_CREATE)
 
         // Set an OnClickListener for the submit button
         btnSubmit.setOnClickListener {
@@ -102,5 +117,49 @@ class DeactivateAlarmActivity : AppCompatActivity() {
             // Finish the current activity and go back to the previous one
             finish()
         }
+
+        // Set an OnClickListener for the pause button
+        btnPause.setOnClickListener {
+            pauseMediaPlayer()
+        }
+    }
+
+    private fun pauseMediaPlayer() {
+        mediaPlayer.let {
+            // Stop the MediaPlayer
+            it.stop()
+
+            // Prepare the MediaPlayer again for playback
+            try {
+                it.prepare()
+            } catch (e: IOException) {
+                e.printStackTrace() // Handle any errors while preparing
+            }
+
+            // Remove any previously scheduled restart
+            handler.removeCallbacksAndMessages(null)
+
+            // Use Handler to restart after 15 seconds
+            handler.postDelayed({
+                it.start() // Restart the MediaPlayer
+            }, 15000) // 15000 milliseconds = 15 seconds
+        }
+    }
+
+    // Service connection to access MediaPlayer from AlarmService
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service as AlarmService.AlarmBinder
+            mediaPlayer = binder.getMediaPlayer() // Get the MediaPlayer instance
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            // Handle service disconnection if necessary
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unbindService(serviceConnection) // Unbind the service
     }
 }
