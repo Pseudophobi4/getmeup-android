@@ -3,16 +3,11 @@ package com.example.getmeup
 import android.app.*
 import android.content.*
 import android.media.*
-import android.os.Binder
-import android.os.Build
-import android.os.Handler
-import android.os.IBinder
-import android.os.Looper
-import android.os.VibrationEffect
-import android.os.VibratorManager
+import android.os.*
 import androidx.core.app.NotificationCompat
 
 class AlarmService : Service() {
+
     private lateinit var mediaPlayer: MediaPlayer
     private lateinit var audioManager: AudioManager
     private lateinit var sharedPreferences: SharedPreferences
@@ -23,27 +18,28 @@ class AlarmService : Service() {
     private lateinit var handler: Handler
     private lateinit var vibrationRunnable: Runnable
 
+    // Broadcast receiver to lock alarm volume
     private val volumeChangeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            // Reset the volume back to alarm level if the user changes it
-            setAlarmVolume()
+            setAlarmVolume() // Reset the alarm volume if changed
         }
     }
 
     override fun onCreate() {
         super.onCreate()
+
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         sharedPreferences = getSharedPreferences("alarm_prefs", Context.MODE_PRIVATE)
-
-        // Save the current system alarm volume to restore later
         originalVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM)
 
-        // Initialize media player
+        // Initialize the media player
         mediaPlayer = MediaPlayer().apply {
-            setAudioAttributes(AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_ALARM)
-                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                .build())
+            setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build()
+            )
             setDataSource(applicationContext, android.net.Uri.parse("android.resource://${packageName}/raw/alarm_sound"))
             isLooping = true
             prepare()
@@ -53,29 +49,28 @@ class AlarmService : Service() {
             vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
         }
 
-        // Register volume change receiver
-        registerReceiver(volumeChangeReceiver, IntentFilter("android.media.VOLUME_CHANGED_ACTION"))
-
-        // Initialize Handler and Runnable for periodic vibration
         handler = Handler(Looper.getMainLooper())
         vibrationRunnable = object : Runnable {
             override fun run() {
-                startVibration() // Restart vibration periodically
-                handler.postDelayed(this, 1000) // Repeat every second (adjust as needed)
+                startVibration()
+                handler.postDelayed(this, 1000) // Restart vibration every second
             }
         }
+
+        // Register receiver to listen for volume changes
+        registerReceiver(volumeChangeReceiver, IntentFilter("android.media.VOLUME_CHANGED_ACTION"))
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // Lock the alarm volume when alarm starts
-        setAlarmVolume()
+        setAlarmVolume() // Lock alarm volume
 
-        // Create and display notification
+        // Create a notification channel and start foreground service
         createNotificationChannel()
         val notificationIntent = Intent(this, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
             this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE
         )
+
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Alarm is ringing")
             .setContentText("It's time to get up!")
@@ -85,54 +80,51 @@ class AlarmService : Service() {
 
         startForeground(NOTIFICATION_ID, notification)
 
-        // Start media player and vibration
-        mediaPlayer.start()
-        startVibration()
-        handler.post(vibrationRunnable) // Start the periodic vibration
+        mediaPlayer.start() // Start alarm sound
+        startVibration() // Start vibration
+        handler.post(vibrationRunnable) // Schedule periodic vibration
 
         return START_STICKY
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        // Stop the media player and release resources
         if (mediaPlayer.isPlaying) mediaPlayer.stop()
         mediaPlayer.release()
 
-        // Stop vibration and remove the periodic vibration callback
-        stopVibration()
-        handler.removeCallbacks(vibrationRunnable)
+        stopVibration() // Stop vibration
+        handler.removeCallbacks(vibrationRunnable) // Remove scheduled vibrations
 
-        // Restore the original system alarm volume
-        audioManager.setStreamVolume(AudioManager.STREAM_ALARM, originalVolume, 0)
+        audioManager.setStreamVolume(AudioManager.STREAM_ALARM, originalVolume, 0) // Restore volume
 
-        // Unregister the volume change receiver
-        unregisterReceiver(volumeChangeReceiver)
+        unregisterReceiver(volumeChangeReceiver) // Unregister receiver
 
-        // Clear notification
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.cancel(NOTIFICATION_ID)
+        notificationManager.cancel(NOTIFICATION_ID) // Clear notification
     }
 
-    // Expose the MediaPlayer to DeactivateAlarmActivity
-    inner class AlarmBinder : Binder() {
-        fun getMediaPlayer(): MediaPlayer {
-            return mediaPlayer
-        }
+    // Method to temporarily stop vibration
+    fun stopVibrationTemporarily() {
+        stopVibration() // Stop any ongoing vibration
+        handler.removeCallbacks(vibrationRunnable) // Cancel scheduled vibrations
     }
 
-    override fun onBind(intent: Intent?): IBinder {
-        return AlarmBinder() // Return the AlarmBinder instance
+    // Method to resume vibration
+    fun resumeVibration() {
+        startVibration() // Start vibration
+        handler.post(vibrationRunnable) // Schedule periodic vibration again
     }
 
     private fun createNotificationChannel() {
-        val channel = NotificationChannel(
-            CHANNEL_ID, "Alarm Service Channel", NotificationManager.IMPORTANCE_HIGH
-        ).apply {
-            description = "This channel is used for the alarm service"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID, "Alarm Service Channel", NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "This channel is used for the alarm service"
+            }
+            val manager = getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(channel)
         }
-        val manager = getSystemService(NotificationManager::class.java)
-        manager.createNotificationChannel(channel)
     }
 
     private fun setAlarmVolume() {
@@ -154,5 +146,15 @@ class AlarmService : Service() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             vibratorManager?.defaultVibrator?.cancel()
         }
+    }
+
+    // Binder class to expose service and MediaPlayer instance
+    inner class AlarmBinder : Binder() {
+        fun getMediaPlayer(): MediaPlayer = mediaPlayer
+        fun getService(): AlarmService = this@AlarmService
+    }
+
+    override fun onBind(intent: Intent?): IBinder {
+        return AlarmBinder() // Return the binder instance
     }
 }
