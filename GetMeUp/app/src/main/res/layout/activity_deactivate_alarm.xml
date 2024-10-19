@@ -16,6 +16,7 @@
         android:maxLength="8"
         android:padding="16dp"
         android:textAlignment="center"
+        android:gravity="center"
         android:textSize="48sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -59,13 +60,28 @@
 
     <Button
         android:id="@+id/buttonPause"
-        android:layout_width="170dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@android:color/transparent"
+        android:text="PAUSE"
+        android:textSize="24sp"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/progressBar"
+        app:layout_constraintEnd_toEndOf="@+id/progressBar"
+        app:layout_constraintStart_toStartOf="@+id/progressBar"
+        app:layout_constraintTop_toTopOf="@+id/progressBar" />
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/progressBar"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:text="Pause"
+        android:max="999999999"
+        android:progress="999999999"
+        app:indicatorDirectionCircular="counterclockwise"
+        app:indicatorSize="170dp"
         app:layout_constraintBottom_toTopOf="@+id/buttonSubmit"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextCode" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
