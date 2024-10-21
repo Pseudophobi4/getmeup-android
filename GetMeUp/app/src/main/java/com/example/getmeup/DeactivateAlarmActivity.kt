@@ -14,6 +14,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
@@ -24,6 +26,7 @@ import java.io.IOException
 import java.util.Calendar
 
 import android.view.animation.LinearInterpolator
+import android.widget.TextView
 import com.google.android.material.progressindicator.CircularProgressIndicator
 
 class DeactivateAlarmActivity : AppCompatActivity() {
@@ -33,6 +36,8 @@ class DeactivateAlarmActivity : AppCompatActivity() {
     private lateinit var btnBack: Button
     private lateinit var btnPause: Button // New pause button
     private lateinit var mediaPlayer: MediaPlayer // MediaPlayer reference
+    private lateinit var tvErrorMessage: TextView
+
 
     private lateinit var progressBar: CircularProgressIndicator
     private var valueAnimator: ValueAnimator? = null
@@ -64,6 +69,10 @@ class DeactivateAlarmActivity : AppCompatActivity() {
         btnPause = findViewById(R.id.buttonPause) // Initialize pause button
 
         progressBar = findViewById(R.id.progressBar)
+        tvErrorMessage = findViewById(R.id.tv_error_message)
+
+        // Initially hide the error message
+        tvErrorMessage.text = ""
 
         etCodeInput.requestFocus() // Set focus to the code input field
 
@@ -83,7 +92,7 @@ class DeactivateAlarmActivity : AppCompatActivity() {
                 isPaused = false
                 deactivateAlarm()
             } else {
-                Toast.makeText(this, "Incorrect code. Please try again.", Toast.LENGTH_SHORT).show()
+                tvErrorMessage.text = "Incorrect code. Please try again."
             }
         }
 
@@ -105,6 +114,17 @@ class DeactivateAlarmActivity : AppCompatActivity() {
                 startCountdown()
             }
         }
+
+        // Add a TextWatcher to clear the error message when the input changes
+        etCodeInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                tvErrorMessage.text = ""
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
     }
 
     private fun deactivateAlarm() {
