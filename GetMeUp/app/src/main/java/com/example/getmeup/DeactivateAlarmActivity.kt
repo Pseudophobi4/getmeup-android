@@ -19,7 +19,6 @@ import android.text.TextWatcher
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import java.io.IOException
@@ -27,6 +26,7 @@ import java.util.Calendar
 
 import android.view.animation.LinearInterpolator
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import com.google.android.material.progressindicator.CircularProgressIndicator
 
 class DeactivateAlarmActivity : AppCompatActivity() {
@@ -37,7 +37,7 @@ class DeactivateAlarmActivity : AppCompatActivity() {
     private lateinit var btnPause: Button // New pause button
     private lateinit var mediaPlayer: MediaPlayer // MediaPlayer reference
     private lateinit var tvErrorMessage: TextView
-
+    private lateinit var tvCodeLabel: TextView
 
     private lateinit var progressBar: CircularProgressIndicator
     private var valueAnimator: ValueAnimator? = null
@@ -45,6 +45,9 @@ class DeactivateAlarmActivity : AppCompatActivity() {
     private var alarmService: AlarmService? = null // AlarmService reference
     private val handler = Handler(Looper.getMainLooper()) // Handler for delayed tasks
     private var isPaused = false // Track if the pause was activated
+
+    private var isBackDisabled = false // Track if back is disabled
+    private var activityPaused = false // Track if the app is paused
 
     // Service connection to get AlarmService instance
     private val serviceConnection = object : ServiceConnection {
@@ -67,6 +70,7 @@ class DeactivateAlarmActivity : AppCompatActivity() {
         btnSubmit = findViewById(R.id.buttonSubmit)
         btnBack = findViewById(R.id.btn_back)
         btnPause = findViewById(R.id.buttonPause) // Initialize pause button
+        tvCodeLabel = findViewById(R.id.tv_code_label)
 
         progressBar = findViewById(R.id.progressBar)
         tvErrorMessage = findViewById(R.id.tv_error_message)
@@ -86,18 +90,33 @@ class DeactivateAlarmActivity : AppCompatActivity() {
             val sharedPreferences = getSharedPreferences("alarm_prefs", Context.MODE_PRIVATE)
             val correctCode = sharedPreferences.getString("alarm_code", "")
 
-            Log.d("DeactivateAlarmActivity", "Input Code: $inputCode, Correct Code: $correctCode")
+            Log.d(
+                "DeactivateAlarmActivity",
+                "Input Code: $inputCode, Correct Code: $correctCode"
+            )
 
             if (inputCode == correctCode) {
                 isPaused = false
+                activityPaused = true
+
+                // Stop sound and vibration immediately
+                stopAlarmSoundAndVibration()
+
+                // Proceed with alarm deactivation
                 deactivateAlarm()
+
+                // Show the deactivation message
+                showDeactivationMessage()
             } else {
                 tvErrorMessage.text = "Incorrect code. Please try again."
             }
         }
 
         // Handle the back button click
-        btnBack.setOnClickListener { finish() }
+        btnBack.setOnClickListener {
+            if (!isBackDisabled)
+                finish()
+        }
 
         // Handle the pause button click
         btnPause.setOnClickListener {
@@ -106,8 +125,10 @@ class DeactivateAlarmActivity : AppCompatActivity() {
 
                 // Add a delay before calling pauseMediaPlayer and startCountdown
                 Handler(Looper.getMainLooper()).postDelayed({
-                    pauseMediaPlayer()
-                    startCountdown()
+                    if (!activityPaused) { // Check if the activity is not paused
+                        pauseMediaPlayer()
+                        startCountdown()
+                    }
                 }, 500) // 500 ms delay
             } else {
                 pauseMediaPlayer()
@@ -124,6 +145,18 @@ class DeactivateAlarmActivity : AppCompatActivity() {
             }
 
             override fun afterTextChanged(s: Editable?) {}
+        })
+
+        // Register the OnBackPressedCallback
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (!isBackDisabled) {
+                    isEnabled = false // Disable this callback
+                    // Call finish() or any other back action you want
+                    finish() // Example: finish the activity
+                }
+                // If back is disabled, do nothing (back press is ignored)
+            }
         })
     }
 
@@ -151,9 +184,33 @@ class DeactivateAlarmActivity : AppCompatActivity() {
         // Broadcast to enable buttons in MainActivity
         val enableButtonsIntent = Intent("ENABLE_BUTTONS")
         LocalBroadcastManager.getInstance(this).sendBroadcast(enableButtonsIntent)
+    }
 
-        // Finish the activity and return to MainActivity
-        finish()
+    private fun showDeactivationMessage() {
+
+        // Get reference to the pre-defined TextView
+        val tvDeactivationMessage = findViewById<TextView>(R.id.tv_deactivation_message)
+
+        // List of views to fade out
+        val viewsToHide = listOf(etCodeInput, btnSubmit, btnPause, progressBar, tvErrorMessage, tvCodeLabel)
+
+        // Fade out all other views
+        viewsToHide.forEach { view ->
+            view.animate()
+                .alpha(0f)
+                .setDuration(500) // Animation duration in ms
+                .withEndAction { view.visibility = android.view.View.GONE } // Set GONE after fading out
+                .start()
+        }
+
+        // Delay the fade-in of the deactivation message
+        Handler(Looper.getMainLooper()).postDelayed({
+            tvDeactivationMessage.visibility = android.view.View.VISIBLE // Make visible before animating
+            tvDeactivationMessage.animate()
+                .alpha(1f) // Animate to full opacity
+                .setDuration(500) // Animation duration in ms
+                .start()
+        }, 500) // 500ms delay before showing the message
     }
 
     private fun rescheduleAlarm(
@@ -181,7 +238,6 @@ class DeactivateAlarmActivity : AppCompatActivity() {
 
     private fun pauseMediaPlayer() {
         isPaused = true // Set the flag to true
-
 
         mediaPlayer.stop() // Stop MediaPlayer
 
@@ -248,8 +304,32 @@ class DeactivateAlarmActivity : AppCompatActivity() {
         }
     }
 
+    private fun stopAlarmSoundAndVibration() {
+        // Stop MediaPlayer if playing
+        if (::mediaPlayer.isInitialized && mediaPlayer.isPlaying) {
+            mediaPlayer.stop() // Stop playback
+            try {
+                mediaPlayer.prepare() // Prepare for potential reuse
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+        }
+
+        // Stop the vibration via AlarmService
+        alarmService?.stopVibrationTemporarily()
+
+        // Clear any scheduled callbacks
+        handler.removeCallbacksAndMessages(null)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        activityPaused = false
+    }
+
     override fun onPause() {
         super.onPause()
+        activityPaused = true
         if (isPaused) {
             // Cancel the value animator
             valueAnimator?.cancel()
