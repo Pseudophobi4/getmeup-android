@@ -247,7 +247,7 @@ class DeactivateAlarmActivity : AppCompatActivity() {
             e.printStackTrace()
         }
 
-        alarmService?.stopVibrationTemporarily() // Stop vibration via AlarmService
+        // alarmService?.stopVibrationTemporarily() // Stop vibration via AlarmService
         handler.removeCallbacksAndMessages(null) // Clear any scheduled tasks
 
         // Restart after 30 seconds unless onDestroy is called first
@@ -299,7 +299,7 @@ class DeactivateAlarmActivity : AppCompatActivity() {
     private fun restartAlarm() {
         if (isPaused) {
             mediaPlayer.start()
-            alarmService?.resumeVibration()
+            // alarmService?.resumeVibration()
             isPaused = false // Reset the flag after restarting
         }
     }
