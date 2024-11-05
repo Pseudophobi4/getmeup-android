@@ -7,13 +7,13 @@
     tools:context=".DeactivateAlarmActivity">
 
     <EditText
-        android:id="@+id/editTextCode"
+        android:id="@+id/et_code_input"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:background="@null"
         android:fontFamily="@font/jetbrainsmono_bold"
         android:gravity="center"
-        android:inputType="text"
+        android:inputType="textNoSuggestions|textVisiblePassword"
         android:maxLength="8"
         android:padding="16dp"
         android:textAlignment="center"
@@ -82,7 +82,7 @@
         app:layout_constraintBottom_toTopOf="@+id/buttonSubmit"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextCode" />
+        app:layout_constraintTop_toBottomOf="@+id/et_code_input" />
 
     <TextView
         android:id="@+id/tv_error_message"
@@ -92,7 +92,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextCode" />
+        app:layout_constraintTop_toBottomOf="@+id/et_code_input" />
 
     <TextView
         android:id="@+id/tv_deactivation_message"

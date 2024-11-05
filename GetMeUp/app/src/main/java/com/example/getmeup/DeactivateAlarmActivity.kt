@@ -66,7 +66,7 @@ class DeactivateAlarmActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_deactivate_alarm)
 
-        etCodeInput = findViewById(R.id.editTextCode)
+        etCodeInput = findViewById(R.id.et_code_input)
         btnSubmit = findViewById(R.id.buttonSubmit)
         btnBack = findViewById(R.id.btn_back)
         btnPause = findViewById(R.id.buttonPause) // Initialize pause button
