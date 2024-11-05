@@ -72,8 +72,8 @@ class AlarmService : Service() {
         )
 
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Alarm is ringing")
-            .setContentText("It's time to get up!")
+            .setContentTitle("Alarm Triggered!")
+            .setContentText("Enter your code to deactivate.")
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentIntent(pendingIntent)
             .build()
