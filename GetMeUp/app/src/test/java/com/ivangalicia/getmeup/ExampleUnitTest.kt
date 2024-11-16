@@ -1,4 +1,4 @@
-package com.example.getmeup
+package com.ivangalicia.getmeup
 
 import org.junit.Test
 

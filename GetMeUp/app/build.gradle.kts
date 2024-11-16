@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.getmeup"
+    namespace = "com.ivangalicia.getmeup"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.getmeup"
+        applicationId = "com.ivangalicia.getmeup"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
