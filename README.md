@@ -12,8 +12,9 @@ An Android alarm app designed to help users get out of bed—literally.
 
 ### **1. Code-Based Alarm Deactivation**
 
-- The alarm cannot be turned off without entering a deactivation code.
-- Users are encouraged to store the code away from the bed, requiring physical movement to retrieve it.
+- The alarm cannot be turned off without entering a pre-set deactivation code.
+- The deactivation code is randomly generated and can be reset.
+- Users are advised to store their codes away from the bed, as retrieving them requires getting up.
 - The code is hidden in the app when the alarm is triggered, preventing users from cheating.
 
 ### **2. Volume Control Lock**
